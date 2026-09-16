@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Anant Job Hunt OS (MVP — Phases 1 + 2)
 
-## Getting Started
+Personal job-search command center. Next.js 16 + Supabase Postgres.
 
-First, run the development server:
+## What's built (MVP)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Auth (login, session via proxy, logout via Supabase)
+- Dashboard (level, XP bar, mission cards)
+- Missions list + mission detail (resume pack, email drafts, JD)
+- Settings (backend wiring status + API config screen)
+- Schema with RLS (`supabase/schema.sql`), seed export (`supabase/seed.sql`)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup (do once)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Supabase project** (you have keys ready):
+   - Dashboard → SQL Editor → run `supabase/schema.sql`
+   - Authentication → Users → Add user (your email) → copy its UUID
+   - In `supabase/seed.sql`, replace `YOUR_USER_UUID` → paste, run it
+   - Storage (later phases): buckets come in Phase 2+
+2. **Env**: copy `.env.example` → `.env.local`, paste URL + anon key
+3. **Run**: `npm run dev` → open http://localhost:3000 → sign in
+4. **Verify**: Dashboard shows Level 4, 774 XP, 10 missions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Later phases (not yet built — honest stub list)
 
-## Learn More
+Interview prep PDFs, DSA module, people research, follow-up reminders,
+analytics, achievements UI, Three.js mission map, Excel import/export.
+Each will be added as a real feature, never a fake screen.
 
-To learn more about Next.js, take a look at the following resources:
+## Rules this app follows
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Single master data source (Supabase = the Excel, evolved)
+- Prepared ≠ Sent: drafts stay DRAFTED until you confirm sending
+- No fake integrations: unconfigured services show "Not connected"

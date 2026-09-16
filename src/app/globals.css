@@ -1,26 +1,157 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --os-bg: #070a14;
+  --os-bg-2: #0b1020;
+  --os-surface: #0d1322;
+  --os-surface-2: #121a30;
+  --os-border: #1e2a45;
+  --os-text: #eef2fa;
+  --os-muted: #8b98ad;
+  --os-radius: 14px;
+  /* semantic accents */
+  --c-cyan: #22d3ee;
+  --c-blue: #3b82f6;
+  --c-violet: #8b5cf6;
+  --c-magenta: #ec4899;
+  --c-green: #34d399;
+  --c-amber: #fbbf24;
+  --c-orange: #fb923c;
+  --c-red: #f87171;
+  --c-gold: #fde047;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--os-bg);
+  background-image:
+    radial-gradient(1100px 500px at 12% -8%, rgba(59, 130, 246, 0.14), transparent 60%),
+    radial-gradient(900px 480px at 50% -12%, rgba(139, 92, 246, 0.13), transparent 60%),
+    radial-gradient(800px 500px at 92% 8%, rgba(236, 72, 153, 0.09), transparent 60%),
+    radial-gradient(1000px 700px at 50% 115%, rgba(34, 211, 238, 0.07), transparent 60%);
+  color: var(--os-text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Grid texture lives on a FIXED layer BEHIND content (never masks content).
+   Previously this mask sat on <body> itself, fading all page content downward. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 100%);
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: 0.04em;
+}
+
+/* Legacy hook kept for compatibility; background now lives on body::before
+   so no mask can ever touch content. */
+.os-backdrop {
+  background: transparent;
+}
+
+.os-panel {
+  background: linear-gradient(180deg, rgba(24, 33, 58, 0.92), rgba(13, 19, 34, 0.94));
+  border: 1px solid var(--os-border);
+  border-radius: var(--os-radius);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.os-hud-line {
+  border-color: var(--os-border);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 18px rgba(34, 211, 238, 0.45);
+}
+.text-glow-gold {
+  text-shadow: 0 0 18px rgba(253, 224, 71, 0.45);
+}
+.text-glow-pink {
+  text-shadow: 0 0 18px rgba(236, 72, 153, 0.5);
+}
+
+/* gradient library (centralized, semantic) */
+.grad-xp { background-image: linear-gradient(90deg, #2563eb, #22d3ee 45%, #8b5cf6 75%, #ec4899); }
+.grad-primary { background-image: linear-gradient(90deg, #0ea5e9, #2563eb); }
+.grad-elite { background-image: linear-gradient(90deg, #ec4899, #8b5cf6); }
+.grad-success { background-image: linear-gradient(90deg, #10b981, #22c55e); }
+.grad-boss { background-image: linear-gradient(120deg, #ef4444, #a855f7 60%, #3b82f6); }
+.grad-gold { background-image: linear-gradient(90deg, #f59e0b, #fde047); }
+.grad-warn { background-image: linear-gradient(90deg, #f59e0b, #f97316); }
+.grad-prep { background-image: linear-gradient(90deg, #3b82f6, #22d3ee); }
+.grad-interview { background-image: linear-gradient(90deg, #a855f7, #ec4899); }
+
+/* animated career ring */
+@keyframes core-spin {
+  to { transform: rotate(360deg); }
+}
+.core-ring-anim {
+  transform-origin: center;
+  animation: core-spin 24s linear infinite;
+}
+
+/* buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.btn:hover { filter: brightness(1.12); box-shadow: 0 4px 18px rgba(34, 211, 238, 0.25); }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background-image: linear-gradient(90deg, #0ea5e9, #2563eb); color: #fff; }
+.btn-elite { background-image: linear-gradient(90deg, #ec4899, #8b5cf6); color: #fff; }
+.btn-success { background-image: linear-gradient(90deg, #10b981, #22c55e); color: #04120c; }
+.btn-warn { background-image: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0e02; }
+.btn-danger { background-image: linear-gradient(90deg, #ef4444, #b91c1c); color: #fff; }
+.btn-gold { background-image: linear-gradient(90deg, #f59e0b, #fde047); color: #1a1402; }
+.btn-ghost { border: 1px solid var(--os-border); color: var(--os-text); }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.05); }
+
+.card-hover {
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 211, 238, 0.45);
+  box-shadow: 0 10px 32px rgba(34, 211, 238, 0.12);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--c-cyan);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+  .core-ring-anim { animation: none; }
 }
