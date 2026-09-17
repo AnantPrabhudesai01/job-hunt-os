@@ -62,7 +62,7 @@ export default async function RootLayout({
         <GameHUD totalXp={xp} active={active} notices={notices} />
         <PresenceTracker />
         <SwRegister />
-        <div className="mx-auto flex max-w-6xl flex-col pb-20 md:h-[calc(100vh-57px)] md:flex-row md:overflow-hidden md:pb-0">
+        <div className="mx-auto flex max-w-6xl flex-col md:h-[calc(100vh-57px)] md:flex-row md:overflow-hidden">
           <SideNav level={level} title={title} xp={xp} pct={pct} streak={streak} />
           <main className="w-full flex-1 px-4 py-5 md:overflow-y-auto md:px-6">
             {children}

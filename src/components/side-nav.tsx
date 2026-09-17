@@ -33,6 +33,8 @@ import {
   FolderOpen,
   Flame,
   Footprints,
+  Menu,
+  X,
 } from "lucide-react";
 
 const NAV = [
@@ -82,57 +84,113 @@ export function SideNav({
   const path = usePathname();
   const reduce = useReducedMotion();
   const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
-  // Server + first paint: plain aside (identical HTML, no hydration gap).
-  // Slide-in animation engages only after mount, once per load.
-  if (!mounted || reduce) {
-    return <Rail path={path} animate={false} level={level} title={title} xp={xp} pct={pct} streak={streak} />;
-  }
-  return <Rail path={path} animate level={level} title={title} xp={xp} pct={pct} streak={streak} />;
-}
-
-function Rail({
-  path,
-  animate,
-  level,
-  title,
-  xp,
-  pct,
-  streak,
-}: {
-  path: string;
-  animate: boolean;
-  level: number;
-  title: string;
-  xp: number;
-  pct: number;
-  streak: number;
-}) {
-  const inner = <RailBody path={path} level={level} title={title} xp={xp} pct={pct} streak={streak} />;
-  if (!animate) {
-    return (
+  // Tapping any destination closes the mobile drawer.
+  useEffect(() => {
+    setOpen(false);
+  }, [path]);
+  const animate = mounted && !reduce;
+  const activeLabel =
+    [...NAV]
+      .sort((a, b) => b.href.length - a.href.length)
+      .find(({ href }) =>
+        href === "/" ? path === "/" : path.startsWith(href),
+      )?.label ?? "Command";
+  return (
+    <>
+      {/* MOBILE: left toggle bar (sticky under the HUD) */}
+      <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-violet-400/15 bg-[#0a0f22]/95 px-3 py-2 backdrop-blur md:hidden">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Open navigation menu"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-violet-400/25 bg-white/5 text-zinc-100 active:bg-white/10"
+        >
+          <Menu size={20} aria-hidden />
+        </button>
+        <span className="text-sm font-semibold text-zinc-100">{activeLabel}</span>
+      </div>
+      {/* MOBILE: backdrop */}
+      {open && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-40 cursor-default bg-black/60 md:hidden"
+        />
+      )}
+      {/* MOBILE: left slide-in drawer */}
       <aside
         aria-label="Primary"
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-violet-400/15 bg-[#0a0f22]/95 backdrop-blur md:static md:flex md:h-screen md:w-64 md:shrink-0 md:flex-col md:border-r md:border-t-0"
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-violet-400/20 bg-[#0a0f22] motion-safe:transition-transform motion-safe:duration-200 md:hidden ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        {inner}
+        <div className="flex items-center justify-between border-b border-violet-400/15 px-3 py-2.5">
+          <span className="text-xs font-bold tracking-widest text-violet-200">
+            NAVIGATE
+          </span>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close navigation menu"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-violet-400/25 bg-white/5 text-zinc-100 active:bg-white/10"
+          >
+            <X size={20} aria-hidden />
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <RailBody
+            path={path}
+            level={level}
+            title={title}
+            xp={xp}
+            pct={pct}
+            streak={streak}
+            onNavigate={() => setOpen(false)}
+          />
+        </div>
       </aside>
-    );
-  }
-  return (
-    <motion.aside
-      initial={{ x: -28, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      aria-label="Primary"
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-violet-400/15 bg-[#0a0f22]/95 backdrop-blur md:static md:flex md:h-screen md:w-64 md:shrink-0 md:flex-col md:border-r md:border-t-0"
-    >
-      {inner}
-    </motion.aside>
+      {/* DESKTOP: static left rail (unchanged) */}
+      {animate ? (
+        <motion.aside
+          initial={{ x: -28, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          aria-label="Primary"
+          className="hidden md:flex md:h-screen md:w-64 md:shrink-0 md:flex-col md:border-r md:border-violet-400/15"
+        >
+          <RailBody
+            path={path}
+            level={level}
+            title={title}
+            xp={xp}
+            pct={pct}
+            streak={streak}
+          />
+        </motion.aside>
+      ) : (
+        <aside
+          aria-label="Primary"
+          className="hidden md:flex md:h-screen md:w-64 md:shrink-0 md:flex-col md:border-r md:border-violet-400/15"
+        >
+          <RailBody
+            path={path}
+            level={level}
+            title={title}
+            xp={xp}
+            pct={pct}
+            streak={streak}
+          />
+        </aside>
+      )}
+    </>
   );
 }
+
 function RailBody({
   path,
   level,
@@ -140,6 +198,7 @@ function RailBody({
   xp,
   pct,
   streak,
+  onNavigate,
 }: {
   path: string;
   level: number;
@@ -147,11 +206,12 @@ function RailBody({
   xp: number;
   pct: number;
   streak: number;
+  onNavigate?: () => void;
 }) {
   return (
     <>
       {/* OPERATIVE CARD */}
-      <div className="mx-3 mt-3 hidden rounded-xl border border-violet-400/25 bg-gradient-to-br from-violet-500/15 via-[#121a30] to-cyan-500/10 p-3 md:block">
+      <div className="mx-3 mt-3 rounded-xl border border-violet-400/25 bg-gradient-to-br from-violet-500/15 via-[#121a30] to-cyan-500/10 p-3 md:block">
         <div className="flex items-center gap-2.5">
           <span className="font-display flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 via-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-[0_0_18px_rgba(139,92,246,0.5)]">
             A
@@ -176,13 +236,14 @@ function RailBody({
       </div>
       {/* NAV */}
       <nav className="flex-1 overflow-x-auto md:min-h-0 md:overflow-y-auto md:overflow-x-hidden">
-        <ul className="flex md:flex-col md:gap-1 md:p-3">
+        <ul className="flex flex-col gap-1 p-3">
           {NAV.map(({ href, label, Icon, color, glow }) => {
             const active = href === "/" ? path === "/" : path.startsWith(href);
             return (
               <li key={href} className="shrink-0">
                 <Link
                   href={href}
+                  onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-all md:w-full ${
                     active
@@ -196,14 +257,14 @@ function RailBody({
                     aria-hidden
                     className={active ? color : "text-zinc-500"}
                   />
-                  <span className="hidden sm:inline md:inline">{label}</span>
+                  <span>{label}</span>
                 </Link>
               </li>
             );
           })}
         </ul>
       </nav>
-      <p className="hidden p-3 text-[10px] tracking-widest text-zinc-600 md:block">
+      <p className="p-3 text-[10px] tracking-widest text-zinc-600">
         CAREER OS · ONLINE
       </p>
     </>
