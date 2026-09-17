@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
     company_id: job.company_id,
     channel: "PHONE",
     status: "CALLED",
-    notes: `Call outcome (${v.contactName?.trim() || "unknown contact"}): ${v.outcome.trim()}${
+    // communications table stores free text in `body` (there is no `notes` column).
+    body: `Call outcome (${v.contactName?.trim() || "unknown contact"}): ${v.outcome.trim()}${
       v.interviewNote?.trim() ? ` | INTERVIEW: ${v.interviewNote.trim()}` : ""
     }`,
   });

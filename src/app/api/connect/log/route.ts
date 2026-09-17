@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
     contact_id: contactId,
     channel: "LINKEDIN",
     status: "INVITE_SENT",
-    notes: `Manual LinkedIn invite to ${label} (user-confirmed).`,
+    // communications table stores free text in `body` (there is no `notes` column).
+    body: `Manual LinkedIn invite to ${label} (user-confirmed).`,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   await supabase.from("xp_transactions").insert({
