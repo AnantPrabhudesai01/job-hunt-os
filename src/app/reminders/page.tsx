@@ -30,7 +30,8 @@ export default async function RemindersPage() {
         .order("due_date", { ascending: true, nullsFirst: false }),
       supabase
         .from("communications")
-        .select("id,notes,created_at,jobs(mission_id,title)")
+        // call outcomes live in `body` (there is no `notes` column).
+        .select("id,body,created_at,jobs(mission_id,title)")
         .eq("channel", "PHONE")
         .order("created_at", { ascending: false })
         .limit(10),
@@ -172,7 +173,7 @@ export default async function RemindersPage() {
               const job = one(c.jobs);
               return (
                 <li key={c.id} className="os-panel p-3 text-sm">
-                  <p className="text-zinc-100">{c.notes}</p>
+                  <p className="text-zinc-100">{c.body}</p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {job?.mission_id} · {job?.title} · {String(c.created_at).slice(0, 10)}
                   </p>
