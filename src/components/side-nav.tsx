@@ -45,6 +45,8 @@ const NAV = [
   { href: "/walkins", label: "Walk-ins", Icon: Footprints, color: "text-yellow-200", glow: "shadow-[inset_2px_0_0_#fde047]" },
   { href: "/reminders", label: "Reminders", Icon: BellRing, color: "text-orange-200", glow: "shadow-[inset_2px_0_0_#fdba74]" },
   { href: "/contacts", label: "Network", Icon: Users, color: "text-pink-300", glow: "shadow-[inset_2px_0_0_#f472b6]" },
+  { href: "/directory", label: "Directory", Icon: Building2, color: "text-orange-200", glow: "shadow-[inset_2px_0_0_#fdba74]" },
+  { href: "/mailshots", label: "Mailshots", Icon: Mail, color: "text-violet-200", glow: "shadow-[inset_2px_0_0_#a78bfa]" },
   { href: "/calls", label: "Calls", Icon: PhoneCall, color: "text-emerald-300", glow: "shadow-[inset_2px_0_0_#6ee7b7]" },
   { href: "/mails", label: "Mails", Icon: Mail, color: "text-teal-200", glow: "shadow-[inset_2px_0_0_#5eead4]" },
   { href: "/groups", label: "Groups", Icon: MessageCircle, color: "text-lime-200", glow: "shadow-[inset_2px_0_0_#bef264]" },
