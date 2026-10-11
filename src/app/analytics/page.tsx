@@ -4,6 +4,7 @@ import { skillDemand } from "@/lib/data";
 import { kindFor, KIND_LABEL, type OppKind } from "@/lib/opportunities";
 import { SectionTitle } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
+import { ProgressChart, type ProgressDay } from "@/components/progress-chart";
 
 function Bar({ label, value, max, tone = "grad-xp" }: { label: string; value: number; max: number; tone?: string }) {
   return (
@@ -29,13 +30,34 @@ export default async function AnalyticsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: jobs }, { data: apps }, { data: xpRows }, { data: appJobs }, { data: nudges }] = await Promise.all([
+  const [{ data: jobs }, { data: apps }, { data: xpRows }, { data: appJobs }, { data: nudges }, { data: shareRows }, { data: applyRows }] = await Promise.all([
     supabase.from("jobs").select("id,status,source,source_type,required_skills,resume_versions(id),interview_preps(id)"),
     supabase.from("applications").select("stage"),
     supabase.from("xp_transactions").select("xp"),
     supabase.from("applications").select("stage,job_id"),
     supabase.from("follow_ups").select("id,due_date").eq("status", "PENDING"),
+    supabase.from("jobs").select("created_at"),
+    supabase.from("applications").select("date_applied").not("date_applied", "is", null),
   ]);
+  // Progress series: Day 1 (first share) → today, zero-filled. Shared = missions
+  // logged per day; applied = manual MARK AS APPLIED flips per day. Read-only.
+  const dayKey = (iso: string) => iso.slice(0, 10);
+  const sharedByDay = new Map<string, number>();
+  (shareRows ?? []).forEach((r: { created_at: string }) => {
+    const k = dayKey(r.created_at);
+    sharedByDay.set(k, (sharedByDay.get(k) ?? 0) + 1);
+  });
+  const appliedByDay = new Map<string, number>();
+  (applyRows ?? []).forEach((r: { date_applied: string }) => {
+    const k = dayKey(r.date_applied);
+    appliedByDay.set(k, (appliedByDay.get(k) ?? 0) + 1);
+  });
+  const firstDay = [...sharedByDay.keys()].sort()[0] ?? new Date().toISOString().slice(0, 10);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const progressDays: ProgressDay[] = [];
+  for (let d = firstDay; d <= todayKey; d = new Date(new Date(d + "T00:00:00Z").getTime() + 86400000).toISOString().slice(0, 10)) {
+    progressDays.push({ date: d, shared: sharedByDay.get(d) ?? 0, applied: appliedByDay.get(d) ?? 0 });
+  }
   const totalXp = (xpRows ?? []).reduce((s, r) => s + (r.xp ?? 0), 0);
   const byStatus = (want: string[]) =>
     (jobs ?? []).filter((j) => want.includes((j.status ?? "").toUpperCase())).length;
@@ -132,6 +154,17 @@ export default async function AnalyticsPage() {
             </div>
           ))}
         </div>
+      </Reveal>
+      <Reveal delay={0.03}>
+        <section className="os-panel p-5">
+          <h3 className="font-display text-sm font-bold tracking-widest text-cyan-200">
+            PROGRESS — SHARED VS APPLIED
+          </h3>
+          <p className="-mt-1 mb-3 text-xs text-zinc-500">
+            Trading view: daily bars show consistency, cumulative curves show capacity. Day 1 = first share.
+          </p>
+          <ProgressChart days={progressDays} />
+        </section>
       </Reveal>
       <Reveal delay={0.05}>
         <section className="os-panel flex flex-col gap-3 p-5">
